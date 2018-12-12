@@ -30,4 +30,30 @@
         <version>1.0.1</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <pluginManagement>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+              <archive>
+                  <manifest>
+                      <mainClass>com.tncet.music.MusicTimer</mainClass>
+                      <addClasspath>true</addClasspath>
+                  <classpathPrefix>lib/</classpathPrefix>
+                  </manifest>
+
+              </archive>
+              <classesDirectory>
+              </classesDirectory>
+          </configuration>
+      </plugin>
+    </plugins>    
+    </pluginManagement>
+  </build>
 </project>
+

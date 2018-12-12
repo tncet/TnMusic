@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Timer;
 
@@ -33,6 +34,7 @@ public class MusicTimer
         timer = new Timer();
         MusicTask task = new MusicTask(this.timeSpan);
         System.out.println("----任务准备执行---- " + "schedule: " + this.broadTime.toString());
+        System.out.println("设置播放时长："+this.timeSpan.toString()+"分钟");
         timer.schedule(task, broadTime, PERIOD_DAY);
     }
 
@@ -43,7 +45,7 @@ public class MusicTimer
         return startDT.getTime();
     }
 
-    private void setBroadTime(int hour, int min, int sec) {
+    public void setBroadTime(int hour, int min, int sec) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
@@ -52,24 +54,47 @@ public class MusicTimer
 
     }
 
+    public void setBroadTime(String dateStr) {
+        String[] tmp = dateStr.split(":");
+        if (tmp.length < 3) {
+            System.out.println("时间配置错误"+dateStr);
+            System.exit(1);
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(tmp[0]));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(tmp[1]));
+        calendar.set(Calendar.SECOND, Integer.parseInt(tmp[2]));
+        this.broadTime = calendar.getTime();
+    }
+
     public static void main( String[] args ) throws Exception
     {
-        Long timeSpan = 7L;
-        if (args.length > 0) {
-            timeSpan = Long.parseLong(args[0]);
+        Long timeSpan = 20L;
+
+        Properties prop = new Properties();
+        FileInputStream in = new FileInputStream("db.properties");
+        prop.load(in);
+        try {
+            timeSpan = Long.parseLong(prop.getProperty("timeSpan"));
+            String lunchTime = prop.getProperty("lunch");
+            String dinnerTime = prop.getProperty("dinner");
+            // 设置午饭计时任务
+            MusicTimer lunch = new MusicTimer();
+            lunch.timeSpan = timeSpan;
+            // lunch.setBroadTime(9,17,0);
+            lunch.setBroadTime(lunchTime);
+            lunch.Start();
+    
+            // 设置晚饭计时任务
+            MusicTimer dinner = new MusicTimer();
+            dinner.timeSpan = timeSpan;
+            dinner.setBroadTime(dinnerTime);
+            // dinner.setBroadTime(17,30,0);
+            dinner.Start();
+        } catch (Exception ex) {
+            System.out.println(ex.getStackTrace());
         }
-
-        // 设置午饭计时任务
-        MusicTimer lunch = new MusicTimer();
-        lunch.timeSpan = timeSpan;
-        lunch.setBroadTime(23,50,0);
-        lunch.Start();
-
-        // 设置晚饭计时任务
-        MusicTimer dinner = new MusicTimer();
-        dinner.timeSpan = timeSpan;
-        dinner.setBroadTime(17,30,0);
-        dinner.Start();
+        
         
     }
 }
