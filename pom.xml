@@ -44,7 +44,7 @@
                   <manifest>
                       <mainClass>com.tncet.music.MusicTimer</mainClass>
                       <addClasspath>true</addClasspath>
-                  <classpathPrefix>lib/</classpathPrefix>
+                      <classpathPrefix>lib/</classpathPrefix>
                   </manifest>
 
               </archive>
@@ -53,13 +53,20 @@
           </configuration>
       </plugin>
       <plugin>
-    <artifactId>maven-assembly-plugin</artifactId>
-    <configuration>
-        <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-    </configuration>
-</plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+              <archive>
+                  <manifest>
+                      <mainClass>com.tncet.music.MusicTimer</mainClass>
+                      <addClasspath>true</addClasspath>
+                      <classpathPrefix>lib/</classpathPrefix>
+                  </manifest>
+              </archive>
+              <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+          </configuration>
+      </plugin>
     </plugins>    
     </pluginManagement>
   </build>
