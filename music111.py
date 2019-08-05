@@ -127,7 +127,10 @@ if __name__ == "__main__":
         #判断当前时间是否为0：00-X:XX
         for name,t in timeList.items():
             m = t[1] + t[2]
-            next_time = datetime.now().replace(hour=t[0], minute=m, second=0)
+            if m >= 60:
+                next_time = datetime.now().replace(hour=t[0]+1, minute=m%60, second=0)
+            else:
+                next_time = datetime.now().replace(hour=t[0], minute=m, second=0)
             start_time = (next_time - datetime.now()).total_seconds()
             if start_time >= 0:
                 print("当前时间"+str(datetime.now())+"， 下次播放时间"+ \
