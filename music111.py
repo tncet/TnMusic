@@ -104,75 +104,102 @@ class TaskTimer(multiprocessing.Process):
         pygame.quit()
 
     def run(self):
-        #在轮到自己播放时执行musicTask函数
-        self.musicTask()
+        while True:
+            tomorrow = datetime.now() + timedelta(days=1)
+            tomorrow = tomorrow.replace(hour=0, minute=1, second=0)
+            delta = (tomorrow - datetime.now()).total_seconds()
+            restDay = 0
+            #通过api接口判断当前日期是否为节假日
+            dateStr = datetime.strftime(datetime.now(), "%Y%m%d")
+            url = "http://timor.tech/api/holiday/info/" + dateStr
+            try:
+                res = requests.get(url)
+                if 'null' in res.text[-15:]:
+                    print("开始执行")
+                    restDay = 0
+                else:      
+                    print (str(result) + " 休息日")
+                    time.sleep(delta)
+                    restDay = 1
+            except:
+                print ("无法获取工作日信息，按默认播放")
+                restDay = 0
+
+            if restDay == 0:
+                m = self.timeSpan + self.minute
+                if m >= 60:
+                    next_time = datetime.now().replace(hour=self.hour+1, minute=m%60, second=0)
+                else:
+                    next_time = datetime.now().replace(hour=self.hour, minute=m, second=0)
+                next_timef = datetime.now().replace(hour=self.hour, minute=self.minute, second=0)
+                start_time = (next_time - datetime.now()).total_seconds()
+                now_time = (datetime.now() - next_timef).total_seconds()
+                if start_time >= 0 and now_time >= 0:
+                #在已经该开始播放时执行musicTask函数
+                    self.musicTask()
+                start_time = start_time - self.timeSpan*60
+
+                if start_time >= 0:
+                    #在还没到开始播放时执行睡眠到开始播放的时间为止
+                    time.sleep(start_time)
+                    self.musicTask()
+                    #print(counter)
+                else:
+                    print("等待下一天的"+str(self.dir))
+                    time.sleep(delta)
 
 
 if __name__ == "__main__":
-    counter = "01早晨"
-    timeList = {
-        "01早晨":[8,10,20],
-        "02中午":[11,29,30],
-        "03午休结束":[13,30,15],
-        "04下午茶":[15,45,15],
-        "05晚餐":[18,0,45],
-        "06回家":[22,0,20]
-    }
+    # 早晨
+    morning = TaskTimer()
+    morning.timeSpan = 60
+    morning.hour = 8
+    morning.minute = 10
+    morning.dir = '01早晨'
+    morning.start()
+    # morning.musicTask()
+    # 中午
+    noon = TaskTimer()
+    noon.timeSpan = 30
+    noon.hour = 11
+    noon.minute = 29
+    noon.dir = '02中午'
+    noon.start()
+    # noon.musicTask()
 
-    while True:
-        tomorrow = datetime.now() + timedelta(days=1)
-        tomorrow = tomorrow.replace(hour=0, minute=1, second=0)
-        delta = (tomorrow - datetime.now()).total_seconds()
-        flag = 0
-        #判断当前时间是否为0：00-X:XX
-        for name,t in timeList.items():
-            m = t[1] + t[2]
-            if m >= 60:
-                next_time = datetime.now().replace(hour=t[0]+1, minute=m%60, second=0)
-            else:
-                next_time = datetime.now().replace(hour=t[0], minute=m, second=0)
-            start_time = (next_time - datetime.now()).total_seconds()
-            if start_time >= 0:
-                print("当前时间"+str(datetime.now())+"， 下次播放时间"+ \
-                    str(datetime.now().replace(hour=t[0], minute=t[1], second=0))+ \
-                        ", 开始等待")
-                #创建进程
-                process = TaskTimer() 
-                process.timeSpan = t[2]
-                process.hour = t[0]
-                process.minute = t[1]
-                process.dir = name
-                counter = name
-                flag = 1
-                break
-        
-        start_time = start_time - timeList[counter][2]*60
-        #print(start_time)
-        if flag == 1:
-            if start_time >= 0:
-                time.sleep(start_time)
-            #print(counter)
-            #通过api接口判断当前日期是否为节假日
-            dateStr = datetime.strftime(datetime.now(), "%Y%m%d")
-            url = "http://tool.bitefu.net/jiari/?d=" + dateStr
-            try:
-                res = requests.get(url)
-                result = res.text.replace('"','')
-                result = int(result)
-                if result != 0:
-                    print (str(result) + " 休息日")
-                    time.sleep(delta)
-                else:      
-                    print("开始执行")
-                    process.start()
-                    process.join()
-            except:
-                print ("无法获取工作日信息，按默认播放")
-                process.start()
-                process.join
-        else:
-            print("已下班，等待下一天")
-            time.sleep(3600)
+    # 午休结束
+    afternoon = TaskTimer()
+    afternoon.timeSpan = 15
+    afternoon.hour = 13
+    afternoon.minute = 30
+    afternoon.dir = '03午休结束'
+    afternoon.start()
+
+    # 下午茶
+    tea = TaskTimer()
+    tea.timeSpan = 15
+    tea.hour = 15
+    tea.minute = 45
+    tea.dir = '04下午茶'
+    tea.start()
+
+    # 晚餐
+    dinner = TaskTimer()
+    dinner.timeSpan = 45
+    dinner.hour = 18
+    dinner.minute = 0
+    dinner.dir = '05晚餐'
+    dinner.start()
+
+    # 回家
+    night = TaskTimer()
+    night.timeSpan = 20
+    night.hour = 22
+    night.minute = 0
+    night.dir = '06回家'
+    night.start()
+    
+
 
 '''
 测试说明：
