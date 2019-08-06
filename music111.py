@@ -152,7 +152,7 @@ class TaskTimer(multiprocessing.Process):
 if __name__ == "__main__":
     # 早晨
     morning = TaskTimer()
-    morning.timeSpan = 60
+    morning.timeSpan = 20
     morning.hour = 8
     morning.minute = 10
     morning.dir = '01早晨'
